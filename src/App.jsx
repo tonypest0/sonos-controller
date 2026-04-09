@@ -6,8 +6,10 @@ import { useSonosApi } from './hooks/useSonosApi'
 import { useScheduler } from './hooks/useScheduler'
 import { useSessionWatcher } from './hooks/useSessionWatcher'
 import { useActivityLog } from './hooks/useActivityLog'
+import { useNowPlaying } from './hooks/useNowPlaying'
 
 import QuickControls from './components/QuickControls'
+import NowPlaying from './components/NowPlaying'
 import ProfileCard from './components/ProfileCard'
 import ProfileEditor from './components/ProfileEditor'
 import Scheduler from './components/Scheduler'
@@ -232,6 +234,8 @@ export default function App() {
   const { enabled: sessionEnabled, setEnabled: setSessionEnabled, startVolume, setStartVolume } =
     useSessionWatcher({ config, onSessionStart: handleSessionStart })
 
+  const nowPlaying = useNowPlaying({ config, enabled: tab === 'profiles' })
+
   const handleSessionEnabledChange = useCallback((checked) => {
     addEntry({
       type: 'setting_toggled',
@@ -420,6 +424,7 @@ export default function App() {
         {/* Profiles Tab */}
         {tab === 'profiles' && (
           <div className="profiles-page">
+            <NowPlaying state={nowPlaying} />
             <div className="profiles-header">
               <h2 className="page-title">Profiles</h2>
               <div style={{ display: 'flex', gap: 8 }}>
