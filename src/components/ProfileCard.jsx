@@ -16,7 +16,7 @@ export default function ProfileCard({
   const [liveSubGain, setLiveSubGain] = useState(profile.subwooferGain ?? 0)
   const badges = [
     { key: 'nightMode', label: 'Night', value: profile.nightMode },
-    { key: 'loudness', label: 'Loud', value: profile.loudness },
+    { key: 'speechEnhancement', label: 'Speech', value: profile.speechEnhancement },
     { key: 'subwooferEnabled', label: 'Sub', value: profile.subwooferEnabled },
   ]
 

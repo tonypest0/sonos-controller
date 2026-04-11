@@ -16,6 +16,9 @@ logs/
 .env.local
 .env.*.local
 
+# Local Sonos data (device-specific, not for version control)
+sonos-data.json
+
 # OS files
 .DS_Store
 Thumbs.db

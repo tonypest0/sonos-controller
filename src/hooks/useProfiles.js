@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { loadStore, saveKey, lsGet, lsSet } from '../lib/fileStore'
 
 const DEFAULT_CONFIG = {
   host: 'localhost',
   port: '5005',
-  room: 'My Room',
+  room: 'Living Room',
 }
 
 const DEFAULT_PROFILES = [
@@ -16,7 +17,7 @@ const DEFAULT_PROFILES = [
     subwooferGain: 0,
     subwooferEnabled: false,
     nightMode: false,
-    loudness: false,
+    speechEnhancement: false,
   },
   {
     id: 'profile-night-mode',
@@ -27,7 +28,7 @@ const DEFAULT_PROFILES = [
     subwooferGain: 0,
     subwooferEnabled: false,
     nightMode: true,
-    loudness: false,
+    speechEnhancement: false,
   },
   {
     id: 'profile-music',
@@ -38,62 +39,71 @@ const DEFAULT_PROFILES = [
     subwooferGain: 0,
     subwooferEnabled: false,
     nightMode: false,
-    loudness: true,
+    speechEnhancement: false,
   },
 ]
-
-function safeGet(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key)
-    if (raw === null) return fallback
-    return JSON.parse(raw)
-  } catch {
-    return fallback
-  }
-}
-
-function safeSet(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch (e) {
-    console.warn('localStorage write failed:', e)
-  }
-}
 
 function genId() {
   return 'profile-' + Math.random().toString(36).slice(2, 10)
 }
 
 export function useProfiles() {
+  // Initialise from localStorage for instant load (no async flash)
   const [profiles, setProfilesState] = useState(() =>
-    safeGet('sonos-profiles', DEFAULT_PROFILES)
+    lsGet('sonos-profiles', DEFAULT_PROFILES)
   )
-
   const [activeProfileId, setActiveProfileIdState] = useState(() =>
-    safeGet('sonos-active-profile', null)
+    lsGet('sonos-active-profile', null)
+  )
+  const [config, setConfigState] = useState(() =>
+    lsGet('sonos-config', DEFAULT_CONFIG)
   )
 
-  const [config, setConfigState] = useState(() =>
-    safeGet('sonos-config', DEFAULT_CONFIG)
-  )
+  // On mount, sync with the file store. If the file has data, it wins
+  // (survives port changes). If the file is empty, seed it from localStorage
+  // so existing data is migrated immediately.
+  useEffect(() => {
+    loadStore().then((store) => {
+      const resolvedProfiles = store['sonos-profiles'] ?? lsGet('sonos-profiles', DEFAULT_PROFILES)
+      const resolvedActiveId = store['sonos-active-profile'] !== undefined
+        ? store['sonos-active-profile']
+        : lsGet('sonos-active-profile', null)
+      const resolvedConfig = store['sonos-config'] ?? lsGet('sonos-config', DEFAULT_CONFIG)
+
+      lsSet('sonos-profiles', resolvedProfiles)
+      lsSet('sonos-active-profile', resolvedActiveId)
+      lsSet('sonos-config', resolvedConfig)
+
+      saveKey('sonos-profiles', resolvedProfiles)
+      saveKey('sonos-active-profile', resolvedActiveId)
+      saveKey('sonos-config', resolvedConfig)
+
+      setProfilesState(resolvedProfiles)
+      setActiveProfileIdState(resolvedActiveId)
+      setConfigState(resolvedConfig)
+    })
+  }, [])
 
   const setProfiles = useCallback((updater) => {
     setProfilesState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      safeSet('sonos-profiles', next)
+      lsSet('sonos-profiles', next)
+      saveKey('sonos-profiles', next)
       return next
     })
   }, [])
 
   const setActiveProfileId = useCallback((id) => {
     setActiveProfileIdState(id)
-    safeSet('sonos-active-profile', id)
+    lsSet('sonos-active-profile', id)
+    saveKey('sonos-active-profile', id)
   }, [])
 
   const setConfig = useCallback((updater) => {
     setConfigState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      safeSet('sonos-config', next)
+      lsSet('sonos-config', next)
+      saveKey('sonos-config', next)
       return next
     })
   }, [])
@@ -114,7 +124,8 @@ export function useProfiles() {
     setProfiles((prev) => prev.filter((p) => p.id !== id))
     setActiveProfileIdState((prev) => {
       if (prev === id) {
-        safeSet('sonos-active-profile', null)
+        lsSet('sonos-active-profile', null)
+        saveKey('sonos-active-profile', null)
         return null
       }
       return prev

@@ -9,7 +9,7 @@ const EMPTY_PROFILE = {
   subwooferGain: 0,
   subwooferEnabled: false,
   nightMode: false,
-  loudness: false,
+  speechEnhancement: false,
 }
 
 function Slider({ label, value, min, max, step = 1, onChange, unit = '' }) {
@@ -162,10 +162,10 @@ export default function ProfileEditor({ profile, onSave, onCancel }) {
                 onChange={set('nightMode')}
               />
               <Toggle
-                label="Loudness"
-                description="Enhances bass and treble at low volumes"
-                checked={form.loudness}
-                onChange={set('loudness')}
+                label="Speech Enhancement"
+                description="Boosts dialogue clarity for movies and TV"
+                checked={form.speechEnhancement}
+                onChange={set('speechEnhancement')}
               />
             </div>
           </div>

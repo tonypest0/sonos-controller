@@ -1,22 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-
-function safeGet(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key)
-    if (raw === null) return fallback
-    return JSON.parse(raw)
-  } catch {
-    return fallback
-  }
-}
-
-function safeSet(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch (e) {
-    console.warn('localStorage write failed:', e)
-  }
-}
+import { loadStore, saveKey, lsGet, lsSet } from '../lib/fileStore'
 
 function genId() {
   return 'sched-' + Math.random().toString(36).slice(2, 10)
@@ -55,15 +38,27 @@ export function formatNextActivation(schedule) {
 
 export function useScheduler({ profiles, config, applyProfile, onAutoApply }) {
   const [schedules, setSchedulesState] = useState(() =>
-    safeGet('sonos-schedules', [])
+    lsGet('sonos-schedules', [])
   )
 
   const lastTriggeredRef = useRef({})
 
+  // On mount, sync with the file store. File data wins; if file is empty,
+  // seed it from localStorage so existing schedules are migrated immediately.
+  useEffect(() => {
+    loadStore().then((store) => {
+      const resolved = store['sonos-schedules'] ?? lsGet('sonos-schedules', [])
+      lsSet('sonos-schedules', resolved)
+      saveKey('sonos-schedules', resolved)
+      setSchedulesState(resolved)
+    })
+  }, [])
+
   const setSchedules = useCallback((updater) => {
     setSchedulesState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      safeSet('sonos-schedules', next)
+      lsSet('sonos-schedules', next)
+      saveKey('sonos-schedules', next)
       return next
     })
   }, [])

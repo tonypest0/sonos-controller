@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History } from 'lucide-react'
 
 import { useProfiles } from './hooks/useProfiles'
@@ -10,6 +10,7 @@ import { useNowPlaying } from './hooks/useNowPlaying'
 
 import QuickControls from './components/QuickControls'
 import NowPlaying from './components/NowPlaying'
+import Queue from './components/Queue'
 import ProfileCard from './components/ProfileCard'
 import ProfileEditor from './components/ProfileEditor'
 import Scheduler from './components/Scheduler'
@@ -122,10 +123,7 @@ export default function App() {
   const [appliedProfile, setAppliedProfile] = useState(null)
   const [applyingId, setApplyingId] = useState(null)
   const [liveCollapsed, setLiveCollapsed] = useState(false)
-  const [liveInstant, setLiveInstant] = useState(false)
   const contentRef = useRef(null)
-  const liveBodyRef = useRef(null)       // passed to QuickControls to measure body height
-  const scrollTriggered = useRef(false)  // true when collapse came from scrolling
   const [autoAppliedId, setAutoAppliedId] = useState(null)
   const { toasts, addToast } = useToasts()
   const { entries: logEntries, addEntry, clearLog } = useActivityLog()
@@ -234,7 +232,8 @@ export default function App() {
   const { enabled: sessionEnabled, setEnabled: setSessionEnabled, startVolume, setStartVolume } =
     useSessionWatcher({ config, onSessionStart: handleSessionStart })
 
-  const nowPlaying = useNowPlaying({ config, enabled: tab === 'profiles' })
+  const { state: nowPlaying, refresh: refreshNowPlaying, deviceBase, groupMembers } = useNowPlaying({ config, enabled: tab === 'profiles' })
+  const [queueOpen, setQueueOpen] = useState(false)
 
   const handleSessionEnabledChange = useCallback((checked) => {
     addEntry({
@@ -272,40 +271,6 @@ export default function App() {
     if (appliedProfile) setLiveCollapsed(true)
   }, [appliedProfile])
 
-  // Scroll listener — instant collapse/expand (no CSS transition) so that
-  // the one-time scrollTop compensation in useLayoutEffect is accurate.
-  useEffect(() => {
-    const el = contentRef.current
-    if (!el) return
-    const onScroll = () => {
-      const shouldCollapse = el.scrollTop > 40
-      setLiveCollapsed(prev => {
-        if (shouldCollapse === prev) return prev
-        setLiveInstant(true)      // disable CSS transition for scroll-triggered change
-        scrollTriggered.current = true
-        return shouldCollapse
-      })
-    }
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [])
-
-  // Compensate scrollTop synchronously after scroll-triggered collapse/expand.
-  // Because the height change is instant (no transition), offsetHeight is already
-  // at its final value here, so the compensation is exact — no gradual jump.
-  useLayoutEffect(() => {
-    if (!scrollTriggered.current) return
-    scrollTriggered.current = false
-    const el = contentRef.current
-    const body = liveBodyRef.current
-    if (!el || !body) return
-    const bodyH = body.offsetHeight
-    if (liveCollapsed) {
-      el.scrollTop += bodyH
-    } else {
-      el.scrollTop = Math.max(0, el.scrollTop - bodyH)
-    }
-  }, [liveCollapsed])
 
   const { schedules, addSchedule, updateSchedule, deleteSchedule } = useScheduler({
     profiles,
@@ -393,7 +358,9 @@ export default function App() {
             border: '1px solid var(--border)',
           }}
         >
-          {config.room || 'No Room'}
+          {groupMembers.length > 1
+            ? groupMembers.join(' + ')
+            : config.room || 'No Room'}
         </span>
       </header>
 
@@ -408,23 +375,34 @@ export default function App() {
       {/* Toasts */}
       <ToastContainer toasts={toasts} />
 
-      {/* Quick Controls */}
-      <QuickControls
-        config={config}
-        appliedProfile={appliedProfile}
-        collapsed={liveCollapsed}
-        instant={liveInstant}
-        onToggle={() => { setLiveInstant(false); setLiveCollapsed(v => !v) }}
-        bodyRef={liveBodyRef}
-        onLog={addEntry}
-      />
-
       {/* Main Content */}
       <main className="app-content" ref={contentRef}>
         {/* Profiles Tab */}
         {tab === 'profiles' && (
           <div className="profiles-page">
-            <NowPlaying state={nowPlaying} />
+            <QuickControls
+              config={config}
+              appliedProfile={appliedProfile}
+              collapsed={liveCollapsed}
+              onToggle={() => setLiveCollapsed(v => !v)}
+              onLog={addEntry}
+            />
+            <NowPlaying
+              state={nowPlaying}
+              config={config}
+              deviceBase={deviceBase}
+              onTransportAction={refreshNowPlaying}
+              queueOpen={queueOpen}
+              onQueueToggle={() => setQueueOpen(v => !v)}
+            />
+            {queueOpen && (
+              <Queue
+                config={config}
+                deviceBase={deviceBase}
+                currentTrackNo={nowPlaying?.trackNo}
+                playbackState={nowPlaying?.playbackState}
+              />
+            )}
             <div className="profiles-header">
               <h2 className="page-title">Profiles</h2>
               <div style={{ display: 'flex', gap: 8 }}>

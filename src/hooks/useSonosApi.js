@@ -72,25 +72,22 @@ export function useSonosApi() {
       `${base}/${room}/volume/${profile.volume}`,
       `${base}/${room}/bass/${profile.bass}`,
       `${base}/${room}/treble/${profile.treble}`,
-      `${base}/${room}/loudness/${boolToOnOff(profile.loudness)}`,
       `${base}/${room}/nightmode/${boolToOnOff(profile.nightMode)}`,
+      `${base}/${room}/speechenhancement/${boolToOnOff(profile.speechEnhancement)}`,
       `${base}/${room}/sub/${profile.subwooferEnabled !== false ? 'on' : 'off'}`,
       ...(profile.subwooferEnabled !== false
         ? [`${base}/${room}/sub/gain/${profile.subwooferGain}`]
         : []),
     ]
 
-    const results = []
-
-    for (const url of commands) {
-      try {
-        const res = await apiGet(url)
-        results.push({ url, ok: res.ok || res.status < 500, status: res.status })
-      } catch (err) {
-        results.push({ url, ok: false, error: err.message })
+    const settled = await Promise.allSettled(commands.map(url => apiGet(url)))
+    const results = settled.map((outcome, i) => {
+      if (outcome.status === 'fulfilled') {
+        const res = outcome.value
+        return { url: commands[i], ok: res.ok || res.status < 500, status: res.status }
       }
-      await new Promise((r) => setTimeout(r, 80))
-    }
+      return { url: commands[i], ok: false, error: outcome.reason?.message }
+    })
 
     setApplying(false)
 
@@ -131,7 +128,6 @@ export function useSonosApi() {
           volume: typeof data.volume === 'number' ? data.volume : 40,
           bass: typeof eq.bass === 'number' ? eq.bass : 0,
           treble: typeof eq.treble === 'number' ? eq.treble : 0,
-          loudness: !!eq.loudness,
           nightMode: !!eq.nightMode,
           subwooferEnabled: typeof eq.subEnabled === 'boolean' ? eq.subEnabled : false,
           subwooferGain: typeof eq.subGain === 'number' ? eq.subGain : 0,
