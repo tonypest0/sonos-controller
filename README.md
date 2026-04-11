@@ -8,13 +8,34 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 
 ## Features
 
-- **Audio profiles** — save named presets with volume, bass, treble, loudness, night mode, and subwoofer settings
+### Playback
+- **Now Playing card** — shows current track title, artist, album, and album art with animated EQ bars while playing
+- **Transport controls** — play/pause, previous, and next track directly from the controller
+- **Queue view** — see the full current queue with per-track thumbnails and active track highlight
+- **Per-track album art** — uses the Sonos device's `/getaa` endpoint so individual track art is shown correctly (including YouTube Music liked-songs playlists, which would otherwise show playlist art)
+
+### Speaker Groups
+- **Kitchen merge toggle** — add or remove the Kitchen speaker from the group with one tap
+- **Group header** — header shows "Living Room + Kitchen" (or all member names) when speakers are grouped
+- **Group-aware volume** — Live Controls reads and writes group volume when speakers are grouped, matching what the Sonos app displays
+
+### Audio Profiles
+- **Saved profiles** — named presets with volume, bass, treble, night mode, speech enhancement, and subwoofer settings
 - **One-click apply** — apply any profile instantly, or capture your current Sonos settings as a new profile
+- **Re-apply** — quickly re-apply the active profile from the now-playing strip
+
+### Automation
 - **Scheduler** — automatically apply a profile on specific days and times
 - **Session watcher** — detects when playback starts and sets a startup volume automatically
-- **Live controls** — adjust volume and subwoofer gain in real time without overwriting saved profiles
-- **Activity log** — track every profile change, schedule trigger, and setting adjustment
-- All data stored locally in the browser (localStorage — nothing leaves your network)
+
+### Live Controls
+- **Real-time sliders** — adjust volume, bass, treble, and subwoofer gain without overwriting saved profiles
+- **Subwoofer toggle** — enable/disable the subwoofer with a live switch
+
+### General
+- **Activity log** — tracks every profile change, schedule trigger, and setting adjustment
+- **Persistent storage** — data stored in both localStorage and a local `sonos-data.json` file so settings survive port changes and browser clears
+- **Run on lock** — can be set up as a macOS launchd daemon so the controller stays running even when the Mac is locked
 
 ---
 
@@ -66,9 +87,22 @@ Hit **Test Connection** to confirm everything is working.
 
 ---
 
+## Running as a background service (macOS launchd)
+
+For a Mac that should keep the controller running at all times — including when locked — use launchd daemons instead of PM2. This runs both services as system-level daemons that start at boot without requiring a login.
+
+Create a plist for node-sonos-http-api at `/Library/LaunchDaemons/com.sonos.api.plist` and one for this app at `/Library/LaunchDaemons/com.sonos.controller.plist`, then load them with:
+
+```bash
+sudo launchctl load /Library/LaunchDaemons/com.sonos.api.plist
+sudo launchctl load /Library/LaunchDaemons/com.sonos.controller.plist
+```
+
+---
+
 ## Running in the background with PM2
 
-To keep both node-sonos-http-api and this app running persistently (survives terminal close, auto-restarts on crash):
+To keep both services running persistently using PM2 (survives terminal close, auto-restarts on crash):
 
 ```bash
 npm install -g pm2
@@ -91,7 +125,7 @@ The included `ecosystem.config.cjs` is pre-configured for this project.
 
 ## How CORS is handled
 
-The Sonos API does not send CORS headers, so browsers block direct requests to it. This app includes a lightweight proxy built into the Vite dev server (`vite.config.js`) that forwards all API calls from the browser through Node.js on the server side — no browser CORS issues, no extra configuration needed.
+The Sonos API does not send CORS headers, so browsers block direct requests to it. This app includes a lightweight proxy built into the Vite dev server (`vite.config.js`) that forwards all API calls from the browser through Node.js — no browser CORS issues, no extra configuration needed.
 
 ---
 
@@ -101,22 +135,39 @@ The Sonos API does not send CORS headers, so browsers block direct requests to i
 src/
   components/
     ConnectionConfig.jsx   # Host/port/room settings UI
+    NowPlaying.jsx         # Now Playing card with transport controls
     ProfileCard.jsx        # Single profile display + apply button
     ProfileEditor.jsx      # Create / edit profile form
-    QuickControls.jsx      # Live volume + sub gain sliders
+    Queue.jsx              # Current queue panel with thumbnails
+    QuickControls.jsx      # Live sliders + kitchen group toggle
     Scheduler.jsx          # Schedule list + add form
     ActivityLog.jsx        # Event history log
   hooks/
+    useNowPlaying.js       # Polls /zones for playback state + group info
     useProfiles.js         # Profile storage and management
     useSonosApi.js         # All Sonos API calls
     useScheduler.js        # Schedule evaluation and triggering
-    useSessionWatcher.js   # Playback state polling
+    useSessionWatcher.js   # Playback state polling for session start
     useActivityLog.js      # Log state management
+  lib/
+    fileStore.js           # localStorage + server-side file persistence
+    sonosArt.js            # Album art URL resolution helper
   App.jsx
   main.jsx
 ecosystem.config.cjs       # PM2 config
-pm2-start.bat / .vbs       # Windows startup helpers
 ```
+
+---
+
+## Bug fixes
+
+| Issue | Fix |
+|---|---|
+| Volume slider showed wrong value when speakers were grouped | Switched to reading `groupState.volume` from `/zones` instead of individual room volume from `/state` |
+| YouTube Music liked-songs showed playlist thumbnail instead of track art | Now fetches art via the Sonos device's `/getaa` endpoint (`albumArtUri`) rather than `absoluteAlbumArtUri` |
+| Port conflict when running alongside Claude Code preview server | Daemon now uses `PORT` env var; default bumped to avoid collision |
+| Live Controls panel overlapped content when scrolling | Panel is now collapsible and collapses automatically after a profile is applied |
+| Volume write applied to individual room only when grouped | Write now uses `groupvolume` command when Kitchen is in the group |
 
 ---
 
