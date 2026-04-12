@@ -1,0 +1,22 @@
+# Dependencies — large, auto-generated, not project code
+node_modules/
+
+# Build output — compiled from src/, reading src/ is enough
+dist/
+
+# Local data files — device-specific, not relevant to code tasks
+sonos-data.json
+
+# Generated launcher scripts — machine-specific paths, not source
+start-api.ps1
+start-ctrl.ps1
+
+# Logs
+logs/
+*.log
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

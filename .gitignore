@@ -4,10 +4,10 @@ node_modules/
 # Build output
 dist/
 
-# Claude Code — contains personal permissions and local test URLs
+# Claude Code — contains personal permissions and local paths
 .claude/
 
-# PM2 logs and runtime data
+# Logs
 logs/
 *.log
 
@@ -29,3 +29,9 @@ Thumbs.db
 
 # Editor
 .vscode/
+.idea/
+
+# Package manager locks (optional — remove if you want to commit these)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
