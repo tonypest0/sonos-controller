@@ -1634,9 +1634,9 @@ input[type='range']::-moz-range-thumb {
 
 .quick-controls-body {
   overflow: hidden;
-  max-height: 220px;
+  max-height: 600px;
   opacity: 1;
-  transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
+  transition: max-height 0.3s ease, opacity 0.2s ease, margin-top 0.25s ease;
   margin-top: 8px;
 }
 
@@ -1707,6 +1707,30 @@ input[type='range']::-moz-range-thumb {
   padding: 1px 5px;
   letter-spacing: 0.02em;
   animation: delta-pop 0.1s ease;
+}
+
+.member-volumes-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 2px;
+}
+
+.member-volumes-divider::before,
+.member-volumes-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.member-volumes-divider span {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .quick-group-row {

@@ -100,14 +100,15 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
   const [subEnabled, setSubEnabled] = useState(false)
   const [bass, setBass] = useState(0)
   const [treble, setTreble] = useState(0)
+  const [memberVolumes, setMemberVolumes] = useState([]) // [{roomName, volume}] when grouped
 
   const interactingRef = useRef(false)
   const interactingTimerRef = useRef(null)
+  const memberTimersRef = useRef({})
 
   const markInteracting = () => {
     interactingRef.current = true
     clearTimeout(interactingTimerRef.current)
-    // Resume polling 2s after the user stops touching a slider
     interactingTimerRef.current = setTimeout(() => { interactingRef.current = false }, 2000)
   }
 
@@ -154,6 +155,16 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
           if (typeof sub.gain === 'number') setSub(sub.gain)
           if (typeof sub.enabled === 'boolean') setSubEnabled(sub.enabled)
         }
+
+        // Per-member volumes (only meaningful when grouped)
+        const members = zone.members
+          .map(m => ({ roomName: m.roomName, volume: m.state?.volume ?? 0 }))
+        setMemberVolumes(prev => {
+          if (members.length < 2) return []
+          const same = members.length === prev.length &&
+            members.every((m, i) => prev[i]?.roomName === m.roomName && prev[i]?.volume === m.volume)
+          return same ? prev : members
+        })
       })
       .catch(() => {})
   }, [config])
@@ -202,6 +213,17 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
   const volumeRef = useRef(volume)
   useEffect(() => { volumeRef.current = volume }, [volume])
   useHardwareVolume(() => volumeRef.current, handleVolume)
+
+  const handleMemberVolume = useCallback((roomName, v) => {
+    markInteracting()
+    setMemberVolumes(prev => prev.map(m => m.roomName === roomName ? { ...m, volume: v } : m))
+    clearTimeout(memberTimersRef.current[roomName])
+    memberTimersRef.current[roomName] = setTimeout(() => {
+      fetch(`/sonos-proxy?url=${encodeURIComponent(
+        `http://${config.host}:${config.port}/${encodeURIComponent(roomName)}/volume/${v}`
+      )}`).catch(() => {})
+    }, 350)
+  }, [config])
 
   const handleSub = (v) => {
     markInteracting()
@@ -252,13 +274,32 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
       <div className="quick-controls-sliders">
         <LiveSlider
           icon={Volume2}
-          label="Volume"
+          label={memberVolumes.length > 1 ? 'Group Vol' : 'Volume'}
           value={volume}
           min={0}
           max={100}
           onChange={handleVolume}
           pending={volApply.pending}
         />
+        {memberVolumes.length > 1 && (
+          <>
+            <div className="member-volumes-divider">
+              <span>Individual Speakers</span>
+            </div>
+            {memberVolumes.map(m => (
+              <LiveSlider
+                key={m.roomName}
+                icon={Volume2}
+                label={m.roomName}
+                value={m.volume}
+                min={0}
+                max={100}
+                onChange={(v) => handleMemberVolume(m.roomName, v)}
+                pending={false}
+              />
+            ))}
+          </>
+        )}
         <div className="quick-slider-row">
           <div className="quick-slider-label">
             <Waves size={14} strokeWidth={2} />
