@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History, Radio } from 'lucide-react'
+import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, Radio } from 'lucide-react'
 
 import { useProfiles } from './hooks/useProfiles'
 import { useSonosApi } from './hooks/useSonosApi'
@@ -476,11 +476,6 @@ export default function App() {
           />
         )}
 
-        {/* Activity Log Tab */}
-        {tab === 'log' && (
-          <ActivityLog entries={logEntries} onClear={clearLog} />
-        )}
-
         {/* Settings Tab */}
         {tab === 'settings' && (
           <div className="settings-page">
@@ -540,6 +535,11 @@ export default function App() {
             </div>
 
             <div className="settings-section">
+              <div className="settings-section-title">Activity Log</div>
+              <ActivityLog entries={logEntries} onClear={clearLog} />
+            </div>
+
+            <div className="settings-section">
               <div className="settings-section-title">About</div>
               <div
                 className="settings-card"
@@ -585,13 +585,6 @@ export default function App() {
         >
           <Calendar size={22} />
           <span className="nav-tab-label">Schedule</span>
-        </button>
-        <button
-          className={`nav-tab ${tab === 'log' ? 'active' : ''}`}
-          onClick={() => setTab('log')}
-        >
-          <History size={22} />
-          <span className="nav-tab-label">Log</span>
         </button>
         <button
           className={`nav-tab ${tab === 'settings' ? 'active' : ''}`}

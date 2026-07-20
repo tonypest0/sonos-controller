@@ -60,19 +60,18 @@ function LogEntry({ entry }) {
 export default function ActivityLog({ entries, onClear }) {
   return (
     <div className="activity-log-page">
-      <div className="activity-log-header">
-        <h2 className="page-title">Activity Log</h2>
-        {entries.length > 0 && (
+      {entries.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
           <button
             className="btn btn-secondary"
             onClick={onClear}
-            style={{ padding: '8px 14px', minHeight: 36, fontSize: 13 }}
+            style={{ padding: '6px 12px', minHeight: 32, fontSize: 12 }}
           >
-            <Trash2 size={13} />
+            <Trash2 size={12} />
             Clear
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {entries.length === 0 ? (
         <div className="empty-state">
