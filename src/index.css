@@ -1837,6 +1837,12 @@ input[type='range']::-moz-range-thumb {
   text-align: center;
 }
 
+/* ===== Now Playing Page ===== */
+.nowplaying-page {
+  display: flex;
+  flex-direction: column;
+}
+
 /* ===== Quick Controls ===== */
 .quick-controls {
   background: var(--bg-secondary);

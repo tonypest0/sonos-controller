@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History } from 'lucide-react'
+import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History, Radio } from 'lucide-react'
 
 import { useProfiles } from './hooks/useProfiles'
 import { useSonosApi } from './hooks/useSonosApi'
@@ -115,7 +115,7 @@ function NowPlayingStrip({ activeProfile, appliedAt, onQuickApply, applying }) {
 
 // ===== Main App =====
 export default function App() {
-  const [tab, setTab] = useState('profiles')
+  const [tab, setTab] = useState('nowplaying')
   const [loading, setLoading] = useState(true)
   const [editorProfile, setEditorProfile] = useState(null) // null = closed, {} = new, {...} = edit
   const [isEditorOpen, setIsEditorOpen] = useState(false)
@@ -232,7 +232,7 @@ export default function App() {
   const { enabled: sessionEnabled, setEnabled: setSessionEnabled, startVolume, setStartVolume } =
     useSessionWatcher({ config, onSessionStart: handleSessionStart })
 
-  const { state: nowPlaying, refresh: refreshNowPlaying, deviceBase, groupMembers } = useNowPlaying({ config, enabled: tab === 'profiles' })
+  const { state: nowPlaying, refresh: refreshNowPlaying, deviceBase, groupMembers } = useNowPlaying({ config, enabled: tab === 'nowplaying' || tab === 'profiles' })
   const [queueOpen, setQueueOpen] = useState(false)
 
   const handleSessionEnabledChange = useCallback((checked) => {
@@ -377,16 +377,9 @@ export default function App() {
 
       {/* Main Content */}
       <main className="app-content" ref={contentRef}>
-        {/* Profiles Tab */}
-        {tab === 'profiles' && (
-          <div className="profiles-page">
-            <QuickControls
-              config={config}
-              appliedProfile={appliedProfile}
-              collapsed={liveCollapsed}
-              onToggle={() => setLiveCollapsed(v => !v)}
-              onLog={addEntry}
-            />
+        {/* Now Playing Tab */}
+        {tab === 'nowplaying' && (
+          <div className="nowplaying-page">
             <NowPlaying
               state={nowPlaying}
               config={config}
@@ -403,6 +396,19 @@ export default function App() {
                 playbackState={nowPlaying?.playbackState}
               />
             )}
+            <QuickControls
+              config={config}
+              appliedProfile={appliedProfile}
+              collapsed={liveCollapsed}
+              onToggle={() => setLiveCollapsed(v => !v)}
+              onLog={addEntry}
+            />
+          </div>
+        )}
+
+        {/* Profiles Tab */}
+        {tab === 'profiles' && (
+          <div className="profiles-page">
             <div className="profiles-header">
               <h2 className="page-title">Profiles</h2>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -559,6 +565,13 @@ export default function App() {
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
+        <button
+          className={`nav-tab ${tab === 'nowplaying' ? 'active' : ''}`}
+          onClick={() => setTab('nowplaying')}
+        >
+          <Radio size={22} />
+          <span className="nav-tab-label">Now Playing</span>
+        </button>
         <button
           className={`nav-tab ${tab === 'profiles' ? 'active' : ''}`}
           onClick={() => setTab('profiles')}
