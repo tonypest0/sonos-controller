@@ -1,22 +1,22 @@
 /* ===== CSS Variables ===== */
 :root {
-  --bg-primary: #0f0e0d;
-  --bg-secondary: #1a1815;
-  --bg-card: #231f1c;
-  --bg-elevated: #2d2825;
-  --accent-primary: #c4714a;
-  --accent-secondary: #e8956a;
-  --accent-glow: rgba(196, 113, 74, 0.15);
-  --accent-glow-strong: rgba(196, 113, 74, 0.3);
-  --text-primary: #f5f0eb;
-  --text-secondary: #a89880;
-  --text-muted: #6b5d52;
-  --border: #3d342e;
-  --border-accent: rgba(196, 113, 74, 0.4);
-  --success: #5a8a5a;
-  --success-bg: rgba(90, 138, 90, 0.15);
-  --danger: #c45a4a;
-  --danger-bg: rgba(196, 90, 74, 0.15);
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-card: #111111;
+  --bg-elevated: #1a1a1a;
+  --accent-primary: #00d4aa;
+  --accent-secondary: #00f0c4;
+  --accent-glow: rgba(0, 212, 170, 0.08);
+  --accent-glow-strong: rgba(0, 212, 170, 0.18);
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-muted: #444444;
+  --border: #1e1e1e;
+  --border-accent: rgba(0, 212, 170, 0.3);
+  --success: #4ade80;
+  --success-bg: rgba(74, 222, 128, 0.08);
+  --danger: #f87171;
+  --danger-bg: rgba(248, 113, 113, 0.08);
   --nav-height: 64px;
   --header-height: 56px;
   --now-playing-height: 44px;
@@ -89,7 +89,9 @@ h1, h2, h3, h4 {
   flex-shrink: 0;
   height: var(--header-height);
   padding-top: var(--safe-top);
-  background: var(--bg-secondary);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -109,11 +111,12 @@ h1, h2, h3, h4 {
   width: 28px;
   height: 28px;
   background: var(--accent-primary);
-  border-radius: 50%;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  box-shadow: 0 0 12px var(--accent-glow-strong);
 }
 
 .app-logo::after {
@@ -240,7 +243,9 @@ h1, h2, h3, h4 {
   right: 0;
   height: calc(var(--nav-height) + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
-  background: var(--bg-secondary);
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
   display: flex;
   align-items: flex-start;
@@ -266,6 +271,7 @@ h1, h2, h3, h4 {
 
 .nav-tab.active {
   color: var(--accent-primary);
+  text-shadow: 0 0 12px var(--accent-glow-strong);
 }
 
 .nav-tab:active {
@@ -341,15 +347,15 @@ h1, h2, h3, h4 {
 
 /* ===== Profile Card ===== */
 .profile-card {
-  background: var(--bg-card);
+  background: linear-gradient(145deg, #161616, #111111);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s;
   position: relative;
   overflow: hidden;
 }
@@ -375,7 +381,7 @@ h1, h2, h3, h4 {
 
 .profile-card.active {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 1px var(--accent-primary), 0 0 16px var(--accent-glow-strong);
+  box-shadow: 0 0 0 1px var(--accent-primary), 0 0 24px rgba(0, 212, 170, 0.2);
 }
 
 .profile-card.active::before {
@@ -497,7 +503,8 @@ h1, h2, h3, h4 {
   height: 18px;
   border-radius: 50%;
   background: var(--accent-primary);
-  border: 2px solid var(--accent-secondary);
+  border: 2px solid #000;
+  box-shadow: 0 0 8px rgba(0, 212, 170, 0.4);
   cursor: pointer;
   transition: transform 0.1s;
 }
@@ -511,7 +518,7 @@ h1, h2, h3, h4 {
   height: 18px;
   border-radius: 50%;
   background: var(--accent-primary);
-  border: 2px solid var(--accent-secondary);
+  border: 2px solid #000;
   cursor: pointer;
 }
 
@@ -608,8 +615,8 @@ h1, h2, h3, h4 {
 .modal-sheet {
   width: 100%;
   max-height: 92vh;
-  background: var(--bg-secondary);
-  border-radius: 20px 20px 0 0;
+  background: #0d0d0d;
+  border-radius: 24px 24px 0 0;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -783,14 +790,14 @@ input[type='range']::-webkit-slider-thumb {
   border-radius: 50%;
   background: var(--accent-primary);
   cursor: pointer;
-  border: 2px solid var(--bg-secondary);
-  box-shadow: 0 0 8px var(--accent-glow-strong);
+  border: 2px solid #000;
+  box-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
   transition: transform 0.1s, box-shadow 0.1s;
 }
 
 input[type='range']::-webkit-slider-thumb:hover {
   transform: scale(1.15);
-  box-shadow: 0 0 12px var(--accent-primary);
+  box-shadow: 0 0 16px rgba(0, 212, 170, 0.7);
 }
 
 input[type='range']::-moz-range-thumb {
@@ -799,8 +806,8 @@ input[type='range']::-moz-range-thumb {
   border-radius: 50%;
   background: var(--accent-primary);
   cursor: pointer;
-  border: 2px solid var(--bg-secondary);
-  box-shadow: 0 0 8px var(--accent-glow-strong);
+  border: 2px solid #000;
+  box-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
 }
 
 .slider-range-labels {
@@ -958,9 +965,9 @@ input[type='range']::-moz-range-thumb {
 }
 
 .schedule-card {
-  background: var(--bg-card);
+  background: linear-gradient(145deg, #161616, #111111);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
@@ -1107,7 +1114,7 @@ input[type='range']::-moz-range-thumb {
 .settings-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -1127,13 +1134,13 @@ input[type='range']::-moz-range-thumb {
 .test-result.success {
   background: var(--success-bg);
   color: var(--success);
-  border: 1px solid rgba(90, 138, 90, 0.3);
+  border: 1px solid rgba(74, 222, 128, 0.25);
 }
 
 .test-result.error {
   background: var(--danger-bg);
   color: var(--danger);
-  border: 1px solid rgba(196, 90, 74, 0.3);
+  border: 1px solid rgba(248, 113, 113, 0.25);
 }
 
 /* ===== Toast Notifications ===== */
@@ -1175,15 +1182,15 @@ input[type='range']::-moz-range-thumb {
 }
 
 .toast.success {
-  background: #1e2e1e;
+  background: #0a1a12;
   color: var(--success);
-  border: 1px solid rgba(90, 138, 90, 0.4);
+  border: 1px solid rgba(74, 222, 128, 0.3);
 }
 
 .toast.error {
-  background: #2e1e1e;
+  background: #1a0a0a;
   color: var(--danger);
-  border: 1px solid rgba(196, 90, 74, 0.4);
+  border: 1px solid rgba(248, 113, 113, 0.3);
 }
 
 .toast.info {
@@ -1271,8 +1278,8 @@ input[type='range']::-moz-range-thumb {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: var(--bg-elevated);
-  border-radius: 12px;
+  background: linear-gradient(135deg, #141414, #0f0f0f);
+  border-radius: 16px;
   margin: 12px 16px 4px;
   border: 1px solid var(--border);
   transition: border-color 0.3s;
@@ -1800,7 +1807,7 @@ select.form-input option {
 .log-entry {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
@@ -1831,9 +1838,9 @@ select.form-input option {
 }
 
 .log-badge--schedule_fired {
-  background: rgba(90, 138, 90, 0.15);
+  background: rgba(74, 222, 128, 0.08);
   color: var(--success);
-  border: 1px solid rgba(90, 138, 90, 0.3);
+  border: 1px solid rgba(74, 222, 128, 0.25);
 }
 
 .log-badge--setting_toggled {
