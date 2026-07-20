@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { Music2, SkipBack, SkipForward, Play, Pause, ListMusic } from 'lucide-react'
+import { Music2, SkipBack, SkipForward, Play, Pause, ListMusic, Maximize2 } from 'lucide-react'
 import { resolveArt } from '../lib/sonosArt'
+import NowPlayingExpanded from './NowPlayingExpanded'
 
 function EqBars() {
   return (
@@ -53,12 +54,15 @@ function TransportControls({ config, playbackState, onAction }) {
 }
 
 export default function NowPlaying({ state, config, deviceBase, onTransportAction, queueOpen, onQueueToggle }) {
+  const [expanded, setExpanded] = useState(false)
+
   const isPlaying = state?.playbackState === 'PLAYING'
   const isPaused  = state?.playbackState === 'PAUSED_PLAYBACK'
   const track     = state?.currentTrack
   const hasTrack  = track && (track.title || track.artist)
   const artSrc    = resolveArt(track, deviceBase)
   const showControls = config?.host && (isPlaying || isPaused)
+  const canExpand = hasTrack && (isPlaying || isPaused)
 
   if (!state) {
     return (
@@ -85,44 +89,69 @@ export default function NowPlaying({ state, config, deviceBase, onTransportActio
   }
 
   return (
-    <div className={`now-playing-card${isPlaying ? ' now-playing-card--playing' : ''}`}>
-      <div className="np-art">
-        {artSrc
-          ? <img src={artSrc} alt="Album art" className="np-art-img" />
-          : <div className="np-art-placeholder"><Music2 size={22} strokeWidth={1.5} /></div>
-        }
-        {isPlaying && <div className="np-art-overlay"><EqBars /></div>}
-      </div>
-
-      <div className="np-info">
-        <div className="np-title-row">
-          {isPlaying && <EqBars />}
-          <span className="np-title">{track.title || 'Unknown track'}</span>
+    <>
+      <div
+        className={`now-playing-card${isPlaying ? ' now-playing-card--playing' : ''}${canExpand ? ' now-playing-card--expandable' : ''}`}
+        onClick={canExpand ? () => setExpanded(true) : undefined}
+      >
+        <div className="np-art">
+          {artSrc
+            ? <img src={artSrc} alt="Album art" className="np-art-img" />
+            : <div className="np-art-placeholder"><Music2 size={22} strokeWidth={1.5} /></div>
+          }
+          {isPlaying && <div className="np-art-overlay"><EqBars /></div>}
         </div>
-        {track.artist && <span className="np-artist">{track.artist}</span>}
-        {track.album  && <span className="np-album">{track.album}</span>}
+
+        <div className="np-info">
+          <div className="np-title-row">
+            {isPlaying && <EqBars />}
+            <span className="np-title">{track.title || 'Unknown track'}</span>
+          </div>
+          {track.artist && <span className="np-artist">{track.artist}</span>}
+          {track.album  && <span className="np-album">{track.album}</span>}
+        </div>
+
+        {isPaused && <span className="np-badge">Paused</span>}
+
+        {showControls && (
+          <TransportControls
+            config={config}
+            playbackState={state.playbackState}
+            onAction={onTransportAction}
+          />
+        )}
+
+        {onQueueToggle && (
+          <button
+            className={`np-ctrl-btn np-queue-btn ${queueOpen ? 'active' : ''}`}
+            onClick={e => { e.stopPropagation(); onQueueToggle() }}
+            aria-label="Toggle queue"
+            title="View queue"
+          >
+            <ListMusic size={15} />
+          </button>
+        )}
+
+        {canExpand && (
+          <button
+            className="np-ctrl-btn np-expand-btn"
+            onClick={e => { e.stopPropagation(); setExpanded(true) }}
+            aria-label="Expand now playing"
+          >
+            <Maximize2 size={14} />
+          </button>
+        )}
       </div>
 
-      {isPaused && <span className="np-badge">Paused</span>}
-
-      {showControls && (
-        <TransportControls
+      {expanded && (
+        <NowPlayingExpanded
+          state={state}
           config={config}
-          playbackState={state.playbackState}
-          onAction={onTransportAction}
+          artSrc={artSrc}
+          onClose={() => setExpanded(false)}
+          onTransportAction={() => { onTransportAction(); }}
         />
       )}
-
-      {onQueueToggle && (
-        <button
-          className={`np-ctrl-btn np-queue-btn ${queueOpen ? 'active' : ''}`}
-          onClick={onQueueToggle}
-          aria-label="Toggle queue"
-          title="View queue"
-        >
-          <ListMusic size={15} />
-        </button>
-      )}
-    </div>
+    </>
   )
 }
