@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, Radio } from 'lucide-react'
 
+import { initHapticTaps } from './lib/haptics'
 import { useProfiles } from './hooks/useProfiles'
 import { useSonosApi } from './hooks/useSonosApi'
 import { useScheduler } from './hooks/useScheduler'
@@ -176,6 +177,9 @@ export default function App() {
     const t = setTimeout(() => setLoading(false), 600)
     return () => clearTimeout(t)
   }, [])
+
+  // Vibrate on every button/toggle tap (Android only — iOS has no Vibration API)
+  useEffect(() => initHapticTaps(), [])
 
   const handleApply = useCallback(async (profile) => {
     setApplyingId(profile.id)
