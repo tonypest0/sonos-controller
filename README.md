@@ -4,7 +4,7 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 
 ![Screenshot](docs/screenshot.jpg)
 
-**[▶ Watch the demo video](docs/demo.mp4)** — a 2-minute walkthrough of Now Playing, Live Controls, grouping, profiles, scheduling and settings.
+**[▶ Watch the demo video](docs/demo.mp4)** — a 2-minute walkthrough of Now Playing, Live Controls, grouping, TV audio, profiles, scheduling and settings.
 
 ---
 
@@ -15,6 +15,11 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 - Control playback (play, pause, skip, previous) without opening the Sonos app
 - View the full queue so you know what's coming up next
 - Album art always shows the correct artwork for the track that's actually playing
+
+### TV Audio
+- When the soundbar switches to the TV input, Now Playing shows a TV view instead of "Nothing playing"
+- A picture of your setup — TV, soundbar and subwoofer — shows the current mode and the sub's on/off state and gain at a glance
+- Toggle Speech Enhancement and Night Mode right from the TV view
 
 ### Speaker Grouping
 - Combine multiple speakers into one group with a single tap, or split them back apart

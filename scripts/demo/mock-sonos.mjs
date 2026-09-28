@@ -22,6 +22,9 @@ const rooms = {
 let grouped = false
 let trackNo = 1
 let playbackState = 'PLAYING'
+let source = 'music' // 'music' | 'tv' — flip with GET /demo/source/tv
+
+const TV_TRACK = { type: 'line_in', uri: 'x-sonos-htastream:RINCON_DEMO000000001400:spdif', title: '', artist: '', album: '' }
 
 function trackObj(i) {
   const t = TRACKS[i]
@@ -33,7 +36,7 @@ function roomState(name) {
   return {
     playbackState,
     trackNo,
-    currentTrack: trackObj(trackNo - 1),
+    currentTrack: source === 'tv' ? TV_TRACK : trackObj(trackNo - 1),
     volume: r.volume,
     equalizer: { bass: r.bass, treble: r.treble, nightMode: r.nightMode, speechEnhancement: r.speech, subEnabled: r.sub.enabled, subGain: r.sub.gain },
     sub: { ...r.sub },
@@ -85,6 +88,11 @@ http.createServer((req, res) => {
     return res.end(art(parseInt(parts[1], 10) || 0))
   }
   if (parts[0] === 'zones') return json(res, zones())
+  if (parts[0] === 'demo' && parts[1] === 'source') {
+    source = parts[2] === 'tv' ? 'tv' : 'music'
+    playbackState = 'PLAYING'
+    return json(res, { source })
+  }
 
   const [roomName, cmd, a1, a2] = parts
   const room = rooms[roomName]

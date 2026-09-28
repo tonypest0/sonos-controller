@@ -43,7 +43,12 @@ export function useNowPlaying({ config, enabled = true }) {
         }
 
         // Only re-render when something meaningful changed
-        const stateKey = `${trackState.playbackState}|${trackState.trackNo}|${trackState.currentTrack?.title}`
+        const eq = trackState.equalizer || {}
+        const sub = trackState.sub || {}
+        const stateKey = [
+          trackState.playbackState, trackState.trackNo, trackState.currentTrack?.title, trackState.currentTrack?.uri,
+          eq.nightMode, eq.speechEnhancement, sub.enabled, sub.gain,
+        ].join('|')
         if (stateKey !== stateKeyRef.current) {
           stateKeyRef.current = stateKey
           setState(trackState)

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { Music2, SkipBack, SkipForward, Play, Pause, ListMusic, Maximize2 } from 'lucide-react'
+import { Music2, SkipBack, SkipForward, Play, Pause, ListMusic, Maximize2, Tv } from 'lucide-react'
 import { resolveArt } from '../lib/sonosArt'
+import { isTvAudio } from '../lib/tv'
 import NowPlayingExpanded from './NowPlayingExpanded'
 
 function EqBars() {
@@ -72,6 +73,22 @@ export default function NowPlaying({ state, config, deviceBase, onTransportActio
           <div className="np-skeleton-line" style={{ width: '60%' }} />
           <div className="np-skeleton-line" style={{ width: '40%', marginTop: 6 }} />
         </div>
+      </div>
+    )
+  }
+
+  if (isTvAudio(track) && (isPlaying || isPaused)) {
+    return (
+      <div className={`now-playing-card${isPlaying ? ' now-playing-card--playing' : ''}`}>
+        <div className="np-art np-art--tv"><Tv size={24} strokeWidth={1.75} /></div>
+        <div className="np-info">
+          <div className="np-title-row">
+            {isPlaying && <EqBars />}
+            <span className="np-title">TV</span>
+          </div>
+          <span className="np-artist">TV audio on {config?.room}</span>
+        </div>
+        <span className={`np-badge${isPlaying ? ' np-badge--live' : ''}`}>{isPlaying ? 'Live' : 'Paused'}</span>
       </div>
     )
   }

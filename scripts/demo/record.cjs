@@ -182,6 +182,22 @@ async function main() {
   await tap('.quick-group-btn', 1800)
   await scrollContent(0)
 
+  // ---- 5b. TV audio ----
+  await caption('TV audio', 'Turn the TV on and the controller switches to a TV view')
+  await wait(1200)
+  await fetch('http://localhost:5005/demo/source/tv')
+  await page.locator('.tv-panel').waitFor()
+  await wait(3200)
+  await caption('Dialogue & night modes', 'Clearer speech and quieter loud scenes for TV watching')
+  const tvToggle = label => page.locator('.tv-modes .quick-slider-row', { hasText: label }).locator('.toggle-switch')
+  await tap(tvToggle('Speech Enhancement'), 1800)
+  await tap(tvToggle('Night Mode'), 2200)
+  await caption('Subwoofer', 'The sub’s on/off state and gain show under the TV')
+  await drag(liveRow('Sub Gain'), 10, 2400)
+  await tap(page.locator('.quick-controls .quick-slider-row', { hasText: 'Subwoofer' }).locator('.toggle-switch'), 2600)
+  await tap(page.locator('.quick-controls .quick-slider-row', { hasText: 'Subwoofer' }).locator('.toggle-switch'), 2600)
+  await scrollContent(0)
+
   // ---- 6. Profiles ----
   await caption('Sound Profiles', 'Save volume, EQ, sub, night mode and speech settings')
   await tap('.nav-tab:has-text("Profiles")', 2000)
@@ -228,7 +244,7 @@ async function main() {
 
   // ---- Outro ----
   await caption('Arc Controller', 'Runs as an always-on local service on macOS or Windows')
-  await tap('.nav-tab:has-text("Now Playing")', 3200)
+  await tap('.nav-tab:has-text("Now Playing")', 4500)
   await hideCaption()
   await wait(800)
 
