@@ -39,7 +39,7 @@ function TransportControls({ config, playbackState, onAction }) {
   const isPlaying = playbackState === 'PLAYING'
 
   return (
-    <div className="np-controls">
+    <div className="np-controls" onClick={e => e.stopPropagation()}>
       <button className="np-ctrl-btn" onClick={() => send('previous')} disabled={busy} aria-label="Previous">
         <SkipBack size={16} />
       </button>
