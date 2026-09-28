@@ -4,6 +4,8 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 
 ![Screenshot](docs/screenshot.jpg)
 
+**[▶ Watch the demo video](docs/demo.mp4)** — a 2-minute walkthrough of Now Playing, Live Controls, grouping, profiles, scheduling and settings.
+
 ---
 
 ## Features
@@ -175,3 +177,20 @@ vite.config.js             # Dev server with proxy + store middleware
 ## License
 
 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — free for personal and non-commercial use. Commercial use requires explicit written permission.
+
+---
+
+## Recording the demo video
+
+`docs/demo.mp4` is generated against a mock Sonos API, so no speaker is needed:
+
+```bash
+node scripts/demo/mock-sonos.mjs &     # fake node-sonos-http-api on :5005
+npm run dev -- --port 5173 &           # app, using the default localhost:5005 / Living Room config
+node scripts/demo/record.cjs           # drives the UI with Playwright, writes frames + frames.txt
+ffmpeg -f concat -safe 0 -i scripts/demo/frames.txt -vf "fps=30,format=yuv420p" \
+  -c:v libx264 -crf 20 -movflags +faststart docs/demo.mp4
+```
+
+`record.cjs` needs Playwright (`npm i -g playwright`, run with `NODE_PATH=$(npm root -g)`).
+
