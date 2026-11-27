@@ -7,10 +7,12 @@ import { useScheduler } from './hooks/useScheduler'
 import { useSessionWatcher } from './hooks/useSessionWatcher'
 import { useActivityLog } from './hooks/useActivityLog'
 import { useNowPlaying } from './hooks/useNowPlaying'
+import { isTvAudio } from './lib/tv'
 
 import QuickControls from './components/QuickControls'
 import NowPlaying from './components/NowPlaying'
 import Queue from './components/Queue'
+import TvPanel from './components/TvPanel'
 import ProfileCard from './components/ProfileCard'
 import ProfileEditor from './components/ProfileEditor'
 import Scheduler from './components/Scheduler'
@@ -234,6 +236,8 @@ export default function App() {
 
   const { state: nowPlaying, refresh: refreshNowPlaying, deviceBase, groupMembers } = useNowPlaying({ config, enabled: tab === 'nowplaying' || tab === 'profiles' })
   const [queueOpen, setQueueOpen] = useState(false)
+  const tvActive = isTvAudio(nowPlaying?.currentTrack) &&
+    (nowPlaying?.playbackState === 'PLAYING' || nowPlaying?.playbackState === 'PAUSED_PLAYBACK')
 
   const handleSessionEnabledChange = useCallback((checked) => {
     addEntry({
@@ -388,7 +392,15 @@ export default function App() {
               queueOpen={queueOpen}
               onQueueToggle={() => setQueueOpen(v => !v)}
             />
-            {queueOpen && (
+            {tvActive && (
+              <TvPanel
+                config={config}
+                state={nowPlaying}
+                groupMembers={groupMembers}
+                onLog={addEntry}
+              />
+            )}
+            {queueOpen && !tvActive && (
               <Queue
                 config={config}
                 deviceBase={deviceBase}

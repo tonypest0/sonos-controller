@@ -4,6 +4,8 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 
 ![Screenshot](docs/screenshot.jpg)
 
+**[🌐 Project site](https://tonypest0.github.io/sonos-controller/)** · **[▶ Watch the demo video](docs/demo.mp4)** — a 2-minute walkthrough of Now Playing, Live Controls, grouping, TV audio, profiles, scheduling and settings.
+
 ---
 
 ## Features
@@ -13,6 +15,11 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 - Control playback (play, pause, skip, previous) without opening the Sonos app
 - View the full queue so you know what's coming up next
 - Album art always shows the correct artwork for the track that's actually playing
+
+### TV Audio
+- When the soundbar switches to the TV input, Now Playing shows a TV view instead of "Nothing playing"
+- A picture of your setup — TV, soundbar and subwoofer — shows the current mode and the sub's on/off state and gain at a glance
+- Toggle Speech Enhancement and Night Mode right from the TV view
 
 ### Speaker Grouping
 - Combine multiple speakers into one group with a single tap, or split them back apart
@@ -175,3 +182,20 @@ vite.config.js             # Dev server with proxy + store middleware
 ## License
 
 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — free for personal and non-commercial use. Commercial use requires explicit written permission.
+
+---
+
+## Recording the demo video
+
+`docs/demo.mp4` is generated against a mock Sonos API, so no speaker is needed:
+
+```bash
+node scripts/demo/mock-sonos.mjs &     # fake node-sonos-http-api on :5005
+npm run dev -- --port 5173 &           # app, using the default localhost:5005 / Living Room config
+node scripts/demo/record.cjs           # drives the UI with Playwright, writes frames + frames.txt
+ffmpeg -f concat -safe 0 -i scripts/demo/frames.txt -vf "fps=30,format=yuv420p" \
+  -c:v libx264 -crf 20 -movflags +faststart docs/demo.mp4
+```
+
+`record.cjs` needs Playwright (`npm i -g playwright`, run with `NODE_PATH=$(npm root -g)`).
+
