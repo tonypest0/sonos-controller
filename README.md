@@ -4,7 +4,7 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 
 ![Screenshot](docs/screenshot.jpg)
 
-**[▶ Watch the demo video](docs/demo.mp4)** — a 2-minute walkthrough of Now Playing, Live Controls, grouping, TV audio, profiles, scheduling and settings.
+**[🌐 Project site](https://tonypest0.github.io/sonos-controller/)** · **[▶ Watch the demo video](docs/demo.mp4)** — a 2-minute walkthrough of Now Playing, Live Controls, grouping, TV audio, profiles, scheduling and settings.
 
 ---
 
